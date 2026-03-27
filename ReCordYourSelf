@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RMIT Course Intro Recorder</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --border: #e2e0d8;
+    --text: #1a1917;
+    --text-muted: #8a8880;
+    --accent: #e8251a;
+    --accent-soft: #fce8e7;
+    --green: #1a7a4a;
+    --green-soft: #e6f4ed;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -0.02em;
+  }
+  .logo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+
+  /* ── Steps indicator ── */
+  .steps-bar {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 2rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .step-tab {
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    user-select: none;
+  }
+  .step-tab.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+  .step-tab.done {
+    color: var(--green);
+  }
+  .step-num {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+  }
+  .step-tab.active .step-num {
+    background: var(--accent);
+    color: #fff;
+  }
+  .step-tab.done .step-num {
+    background: var(--green);
+    color: #fff;
+  }
+
+  /* ── Main content ── */
+  main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── Form elements ── */
+  .field { margin-bottom: 1.25rem; }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 7px;
+  }
+  input[type=text], textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    background: var(--surface);
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  input[type=text]:focus, textarea:focus {
+    border-color: #aaa;
+  }
+  textarea { resize: vertical; line-height: 1.65; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--surface2); }
+  .btn:active { transform: scale(0.98); }
+  .btn.primary {
+    background: var(--text);
+    color: #fff;
+    border-color: var(--text);
+  }
+  .btn.primary:hover { background: #333; }
+  .btn.danger {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .btn.danger:hover { background: #c01e14; }
+  .btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none; }
+
+  /* ── Info row ── */
+  .info-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+  .chip {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--surface);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .toolbar-group span {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .toolbar-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+  }
+  .icon-btn {
+    width: 30px; height: 30px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.12s;
+  }
+  .icon-btn:hover { background: var(--surface2); }
+  .value-display {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    min-width: 32px;
+    text-align: center;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 90px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--text);
+    cursor: pointer;
+  }
+
+  /* ── Camera view ── */
+  #cam-wrap {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #111;
+    aspect-ratio: 16/9;
+    border: 1px solid var(--border);
+  }
+  #cam-feed {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: scaleX(-1);
+  }
+
+  /* Teleprompter overlay */
+  #prompt-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.82) 30%);
+    padding: 32px 28px 20px;
+    max-height: 46%;
+    overflow: hidden;
+  }
+  #prompt-text {
+    color: #fff;
+    font-weight: 500;
+    line-height: 1.6;
+    font-size: 22px;
+    transition: transform 0.06s linear;
+  }
+
+  /* Countdown overlay */
+  #countdown-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+  #countdown-overlay.show { display: flex; }
+  #countdown-num {
+    font-size: 120px;
+    font-weight: 300;
+    color: #fff;
+    line-height: 1;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: -0.04em;
+  }
+  #countdown-sub {
+    font-size: 16px;
+    color: rgba(255,255,255,0.6);
+    font-weight: 400;
+  }
+
+  /* Permission error overlay */
+  #cam-error {
+    position: absolute;
+    inset: 0;
+    background: #111;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #fff;
+    text-align: center;
+    padding: 2rem;
+  }
+  #cam-error.show { display: flex; }
+  #cam-error p { font-size: 14px; color: rgba(255,255,255,0.6); max-width: 340px; line-height: 1.6; }
+
+  /* REC indicator */
+  .rec-badge {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .rec-badge.show { display: flex; }
+  .rec-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: blink 1s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  /* ── Step 2 controls ── */
+  .cam-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .cam-controls .spacer { flex: 1; }
+
+  /* ── Step 3 / Result ── */
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+  }
+  .result-video {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    background: #000;
+    margin-bottom: 1.25rem;
+    display: block;
+  }
+  .success-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green);
+    background: var(--green-soft);
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+    letter-spacing: 0.03em;
+  }
+
+  /* Progress */
+  .progress-section {
+    margin-top: 1rem;
+    display: none;
+  }
+  .progress-section.show { display: block; }
+  .progress-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .progress-label strong { color: var(--text); }
+  .progress-bg {
+    height: 5px;
+    border-radius: 3px;
+    background: var(--surface2);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--text);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+  .progress-msg {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── Permission helper ── */
+  .help-box {
+    background: #fffbea;
+    border: 1px solid #f0e68c;
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #6b5900;
+    margin-top: 12px;
+  }
+  .help-box strong { font-weight: 600; }
+
+  /* ── Browser warning ── */
+  #browser-warn {
+    background: var(--accent-soft);
+    border: 1px solid #f5c0bd;
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #8b1a17;
+    margin-bottom: 1rem;
+    display: none;
+  }
+  #browser-warn.show { display: block; }
+
+  /* footer */
+  footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    RMIT Course Intro Recorder
+  </div>
+  <span class="badge">Learning Design</span>
+</header>
+
+<div class="steps-bar">
+  <div class="step-tab active" id="tab1">
+    <div class="step-num">1</div> Script
+  </div>
+  <div class="step-tab" id="tab2">
+    <div class="step-num">2</div> Quay video
+  </div>
+  <div class="step-tab" id="tab3">
+    <div class="step-num">3</div> Tải xuống
+  </div>
+</div>
+
+<main>
+
+  <!-- ── STEP 1 ── -->
+  <div id="panel1" class="panel active">
+    <div id="browser-warn">
+      Trình duyệt của bạn có thể không hỗ trợ đầy đủ. Hãy dùng <strong>Google Chrome</strong> hoặc <strong>Microsoft Edge</strong> để có kết quả tốt nhất.
+    </div>
+
+    <div class="field">
+      <label>Tên giảng viên</label>
+      <input type="text" id="name-input" placeholder="VD: Dr. Nguyen Van A">
+    </div>
+    <div class="field">
+      <label>Script bài giảng</label>
+      <textarea id="script-input" rows="10" placeholder="Chào mừng các bạn đến với khóa học...&#10;&#10;Trong học phần này, chúng ta sẽ cùng nhau khám phá..."></textarea>
+    </div>
+
+    <div class="info-row">
+      <span class="chip" id="word-count">0 từ</span>
+      <span class="chip" id="est-time">~0 phút</span>
+      <div style="flex:1"></div>
+      <button class="btn primary" onclick="goToStep2()">Tiếp theo →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 2 ── -->
+  <div id="panel2" class="panel">
+
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <span>Cỡ chữ</span>
+        <button class="icon-btn" onclick="changeFontSize(-2)">A−</button>
+        <span class="value-display" id="font-val">22px</span>
+        <button class="icon-btn" onclick="changeFontSize(2)">A+</button>
+      </div>
+      <div class="toolbar-divider"></div>
+      <div class="toolbar-group">
+        <span>Tốc độ cuộn</span>
+        <input type="range" id="speed-slider" min="1" max="10" value="4" step="1" oninput="updateSpeed(this.value)">
+        <span class="value-display" id="speed-val">4</span>
+      </div>
+      <div class="toolbar-divider"></div>
+      <div class="toolbar-group">
+        <span>Đếm ngược</span>
+        <input type="range" id="cd-slider" min="3" max="10" value="5" step="1" oninput="updateCd(this.value)">
+        <span class="value-display" id="cd-val">5s</span>
+      </div>
+    </div>
+
+    <div id="cam-wrap">
+      <video id="cam-feed" autoplay playsinline></video>
+      <div id="prompt-overlay">
+        <div id="prompt-text"></div>
+      </div>
+      <div id="countdown-overlay">
+        <div id="countdown-num">5</div>
+        <div id="countdown-sub">Nhìn thẳng vào camera...</div>
+      </div>
+      <div id="cam-error">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"><path d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/><line x1="3" y1="3" x2="21" y2="21" stroke="var(--accent)" stroke-width="1.5"/></svg>
+        <strong style="font-size:15px">Không thể truy cập camera</strong>
+        <p id="cam-error-msg">Vui lòng cấp quyền camera và microphone cho trình duyệt, sau đó tải lại trang.</p>
+      </div>
+    </div>
+
+    <div class="help-box" id="permission-help" style="display:none">
+      <strong>Trên Mac:</strong> Vào System Settings → Privacy &amp; Security → Camera → bật quyền cho Chrome/Edge.<br>
+      Sau đó <strong>tải lại trang</strong> và thử lại.
+    </div>
+
+    <div class="cam-controls">
+      <button class="btn" id="btn-back" onclick="goBack()">← Sửa script</button>
+      <button class="btn primary" id="btn-start" onclick="startCountdown()">Bắt đầu quay</button>
+      <button class="btn danger" id="btn-stop" onclick="stopRec()" style="display:none">Dừng &amp; lưu</button>
+      <div class="spacer"></div>
+      <div class="rec-badge" id="rec-badge"><div class="rec-dot"></div> REC</div>
+    </div>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:8px">
+      Script sẽ tự cuộn khi bắt đầu quay. Camera hiển thị <em>mirror</em> nhưng video xuất ra sẽ không bị lật.
+    </p>
+  </div>
+
+  <!-- ── STEP 3 ── -->
+  <div id="panel3" class="panel">
+    <div class="result-card">
+      <div class="success-tag">✓ Quay thành công</div>
+      <video id="result-video" class="result-video" controls></video>
+
+      <div class="progress-section" id="progress-section">
+        <div class="progress-label">
+          <strong id="progress-title">Đang chuyển đổi sang MP4</strong>
+          <span id="progress-pct">0%</span>
+        </div>
+        <div class="progress-bg"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="progress-msg" id="progress-msg">Đang tải ffmpeg.wasm (~30MB lần đầu)...</div>
+      </div>
+
+      <div class="info-row" id="action-row">
+        <button class="btn primary" id="btn-mp4" onclick="convertMp4()">Xuất MP4</button>
+        <button class="btn" id="btn-webm" onclick="dlWebm()">Tải WebM (nhanh hơn)</button>
+        <button class="btn" onclick="resetAll()">Quay lại</button>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:10px">
+        <strong>MP4</strong> tương thích với Premiere, DaVinci Resolve, CapCut — dễ ghép intro/outro hơn.<br>
+        <strong>WebM</strong> xuất ngay, không cần chờ — dùng khi cần gửi nhanh.
+      </p>
+    </div>
+  </div>
+
+</main>
+
+<footer>RMIT Vietnam · Learning Design · Chỉ dùng Chrome hoặc Edge để đảm bảo chất lượng tốt nhất</footer>
+
+<!-- ffmpeg.wasm -->
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+
+<script>
+// ── State ──
+let stream = null, mediaRecorder = null, chunks = [], webmBlob = null, webmUrl = null;
+let scrollInterval = null, scrollPos = 0;
+let speed = 4, fontSize = 22, cdSecs = 5;
+let ffmpegInst = null;
+
+// ── Safari / browser check ──
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+if (isSafari || isFirefox) {
+  document.getElementById('browser-warn').classList.add('show');
+}
+
+// ── Word count ──
+document.getElementById('script-input').addEventListener('input', () => {
+  const w = document.getElementById('script-input').value.trim().split(/\s+/).filter(Boolean).length;
+  document.getElementById('word-count').textContent = w + ' từ';
+  document.getElementById('est-time').textContent = '~' + Math.max(1, Math.round(w / 130)) + ' phút';
+});
+
+// ── Step navigation ──
+function setTab(n) {
+  [1,2,3].forEach(i => {
+    document.getElementById('panel'+i).classList.toggle('active', i===n);
+    const t = document.getElementById('tab'+i);
+    t.classList.remove('active','done');
+    if (i === n) t.classList.add('active');
+    else if (i < n) t.classList.add('done');
+  });
+}
+
+// ── Step 1 → 2 ──
+async function goToStep2() {
+  const script = document.getElementById('script-input').value.trim();
+  if (!script) { alert('Vui lòng nhập script trước nhé!'); return; }
+
+  const promptEl = document.getElementById('prompt-text');
+  promptEl.textContent = script;
+  promptEl.style.fontSize = fontSize + 'px';
+  scrollPos = 0;
+  promptEl.style.transform = 'translateY(0)';
+
+  setTab(2);
+  await startCamera();
+}
+
+async function startCamera() {
+  const errorEl = document.getElementById('cam-error');
+  const helpEl  = document.getElementById('permission-help');
+  errorEl.classList.remove('show');
+  helpEl.style.display = 'none';
+
+  try {
+    // Request highest quality available
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: 'user' },
+      audio: { echoCancellation: true, noiseSuppression: true }
+    });
+    const feed = document.getElementById('cam-feed');
+    feed.srcObject = stream;
+    feed.muted = true; // mute preview only, recording still captures audio
+    document.getElementById('btn-start').disabled = false;
+  } catch(e) {
+    console.error('Camera error:', e);
+    errorEl.classList.add('show');
+    helpEl.style.display = 'block';
+    document.getElementById('cam-error-msg').textContent =
+      e.name === 'NotAllowedError'
+        ? 'Bạn đã từ chối quyền truy cập. Cấp quyền trong cài đặt trình duyệt / hệ điều hành rồi tải lại trang.'
+        : e.name === 'NotFoundError'
+        ? 'Không tìm thấy camera hoặc microphone.'
+        : 'Lỗi: ' + e.message;
+    document.getElementById('btn-start').disabled = true;
+  }
+}
+
+function goBack() {
+  stopScrolling();
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  document.getElementById('cam-feed').srcObject = null;
+  setTab(1);
+}
+
+// ── Toolbar ──
+function changeFontSize(d) {
+  fontSize = Math.max(14, Math.min(44, fontSize + d));
+  document.getElementById('font-val').textContent = fontSize + 'px';
+  document.getElementById('prompt-text').style.fontSize = fontSize + 'px';
+}
+function updateSpeed(v) { speed = parseInt(v); document.getElementById('speed-val').textContent = v; }
+function updateCd(v) { cdSecs = parseInt(v); document.getElementById('cd-val').textContent = v + 's'; }
+
+// ── Countdown ──
+function startCountdown() {
+  if (!stream) { alert('Camera chưa sẵn sàng!'); return; }
+  document.getElementById('btn-start').disabled = true;
+  document.getElementById('btn-back').disabled = true;
+
+  const overlay = document.getElementById('countdown-overlay');
+  const numEl   = document.getElementById('countdown-num');
+  overlay.classList.add('show');
+  numEl.textContent = cdSecs;
+
+  let n = cdSecs;
+  const t = setInterval(() => {
+    n--;
+    if (n <= 0) {
+      clearInterval(t);
+      overlay.classList.remove('show');
+      beginRec();
+    } else {
+      numEl.textContent = n;
+    }
+  }, 1000);
+}
+
+// ── Recording ──
+function beginRec() {
+  document.getElementById('btn-start').style.display = 'none';
+  document.getElementById('btn-stop').style.display = '';
+  document.getElementById('rec-badge').classList.add('show');
+
+  chunks = [];
+  // Pick best supported codec
+  const mimes = [
+    'video/webm;codecs=vp9,opus',
+    'video/webm;codecs=vp8,opus',
+    'video/webm',
+  ];
+  let opts = {};
+  for (const m of mimes) {
+    if (MediaRecorder.isTypeSupported(m)) { opts = { mimeType: m }; break; }
+  }
+  mediaRecorder = new MediaRecorder(stream, opts);
+  mediaRecorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+  mediaRecorder.onstop = buildBlob;
+  mediaRecorder.start(500);
+
+  scrollPos = 0;
+  document.getElementById('prompt-text').style.transform = 'translateY(0)';
+  startScrolling();
+}
+
+function stopRec() {
+  stopScrolling();
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+}
+
+function buildBlob() {
+  webmBlob = new Blob(chunks, { type: 'video/webm' });
+  webmUrl  = URL.createObjectURL(webmBlob);
+  document.getElementById('result-video').src = webmUrl;
+
+  // Reset step 2 UI for next time
+  document.getElementById('btn-start').style.display = '';
+  document.getElementById('btn-start').disabled = false;
+  document.getElementById('btn-back').disabled = false;
+  document.getElementById('btn-stop').style.display = 'none';
+  document.getElementById('rec-badge').classList.remove('show');
+
+  setTab(3);
+}
+
+// ── Scrolling ──
+function startScrolling() {
+  stopScrolling();
+  scrollInterval = setInterval(() => {
+    scrollPos += speed * 0.15;
+    document.getElementById('prompt-text').style.transform = 'translateY(-' + scrollPos + 'px)';
+  }, 50);
+}
+function stopScrolling() {
+  if (scrollInterval) { clearInterval(scrollInterval); scrollInterval = null; }
+}
+
+// ── Download WebM ──
+function dlWebm() {
+  const name = (document.getElementById('name-input').value.trim() || 'course-intro').replace(/\s+/g, '-');
+  const a = document.createElement('a');
+  a.href = webmUrl; a.download = name + '-intro.webm'; a.click();
+}
+
+// ── Convert to MP4 ──
+async function convertMp4() {
+  const btnMp4 = document.getElementById('btn-mp4');
+  const btnWebm = document.getElementById('btn-webm');
+  const progSec = document.getElementById('progress-section');
+
+  btnMp4.disabled = true;
+  btnWebm.disabled = true;
+  progSec.classList.add('show');
+  setProgress(0, 'Đang tải ffmpeg.wasm (~30MB lần đầu)...');
+
+  try {
+    const { FFmpeg } = FFmpegWASM;
+    const { fetchFile, toBlobURL } = FFmpegUtil;
+
+    if (!ffmpegInst) {
+      ffmpegInst = new FFmpeg();
+      ffmpegInst.on('progress', ({ progress }) => {
+        const pct = Math.min(99, Math.round(progress * 100));
+        setProgress(pct, 'Đang encode... ' + pct + '%');
+      });
+      ffmpegInst.on('log', ({ message }) => {
+        document.getElementById('progress-msg').textContent = message.slice(0, 80);
+      });
+
+      const base = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd';
+      await ffmpegInst.load({
+        coreURL: await toBlobURL(base + '/ffmpeg-core.js', 'text/javascript'),
+        wasmURL: await toBlobURL(base + '/ffmpeg-core.wasm', 'application/wasm'),
+      });
+    }
+
+    setProgress(8, 'Đang đọc video...');
+    await ffmpegInst.writeFile('in.webm', await fetchFile(webmBlob));
+
+    setProgress(12, 'Bắt đầu encode H.264...');
+    await ffmpegInst.exec([
+      '-i', 'in.webm',
+      '-c:v', 'libx264',
+      '-preset', 'fast',
+      '-crf', '20',
+      '-c:a', 'aac',
+      '-b:a', '192k',
+      '-movflags', '+faststart',
+      '-pix_fmt', 'yuv420p',
+      'out.mp4'
+    ]);
+
+    setProgress(97, 'Đang đọc file đầu ra...');
+    const data = await ffmpegInst.readFile('out.mp4');
+    const mp4Blob = new Blob([data.buffer], { type: 'video/mp4' });
+    const mp4Url  = URL.createObjectURL(mp4Blob);
+
+    document.getElementById('result-video').src = mp4Url;
+    setProgress(100, 'Hoàn tất! Đang tải xuống...');
+    document.getElementById('progress-title').textContent = 'Chuyển đổi thành công';
+
+    const name = (document.getElementById('name-input').value.trim() || 'course-intro').replace(/\s+/g, '-');
+    const a = document.createElement('a');
+    a.href = mp4Url; a.download = name + '-intro.mp4'; a.click();
+
+    setTimeout(() => {
+      progSec.classList.remove('show');
+      btnMp4.disabled = false;
+      btnWebm.disabled = false;
+    }, 2500);
+
+  } catch(e) {
+    console.error(e);
+    setProgress(0, '');
+    document.getElementById('progress-title').textContent = 'Lỗi: ' + e.message;
+    document.getElementById('progress-msg').textContent = 'Thử tải WebM và convert bằng phần mềm khác.';
+    btnMp4.disabled = false;
+    btnWebm.disabled = false;
+  }
+}
+
+function setProgress(pct, msg) {
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+  if (msg) document.getElementById('progress-msg').textContent = msg;
+}
+
+// ── Reset ──
+function resetAll() {
+  chunks = []; webmBlob = null; webmUrl = null; scrollPos = 0;
+  document.getElementById('script-input').value = '';
+  document.getElementById('name-input').value = '';
+  document.getElementById('word-count').textContent = '0 từ';
+  document.getElementById('est-time').textContent = '~0 phút';
+  document.getElementById('progress-section').classList.remove('show');
+  setTab(1);
+}
+</script>
+</body>
+</html>
